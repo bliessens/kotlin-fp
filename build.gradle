@@ -2,14 +2,13 @@ plugins {
     id "org.jetbrains.kotlin.jvm" version "1.3.61"
 }
 
-//kotlinDslPluginOptions {
-//    experimentalWarning.set(false)
-//}
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
 
 repositories {
-    // The org.jetbrains.kotlin.jvm plugin requires a repository
-    // where to download the Kotlin compiler dependencies from.
-    jcenter()
     mavenCentral()
 }
 
@@ -19,8 +18,15 @@ dependencies {
 
 //    implementation "org.jetbrains.kotlin:kotlin-reflect"
     testImplementation "org.jetbrains.kotlin:kotlin-test"
-    testImplementation "org.jetbrains.kotlin:kotlin-test-junit"
+//    testImplementation "org.jetbrains.kotlin:kotlin-test-junit"
+    testImplementation "org.jetbrains.kotlin:kotlin-test-junit5"
+    testImplementation("org.junit.jupiter:junit-jupiter:5.5.2")
 
-//    implementation "org.junit:junit:5.5"
-//    testImplementation "junit:junit:5.5"
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events(/*"passed", "skipped",*/ "failed")
+    }
 }
