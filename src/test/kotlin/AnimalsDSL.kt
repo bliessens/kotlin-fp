@@ -1,4 +1,4 @@
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import people.animal
 import people.animals
 import kotlin.test.assertEquals
@@ -29,4 +29,5 @@ internal class AnimalsDSL {
         assertEquals("giraffe", animals.animals.first().type)
         assertEquals("elephant", animals.animals.last().type)
     }
+
 }
