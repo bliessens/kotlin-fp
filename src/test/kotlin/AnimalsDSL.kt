@@ -30,4 +30,8 @@ internal class AnimalsDSL {
         assertEquals("elephant", animals.animals.last().type)
     }
 
+    @Test
+    internal fun name() {
+
+    }
 }

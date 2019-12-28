@@ -9,7 +9,7 @@ annotation class AnimalDSL
 fun animals(init: AnimalsBuilder.() -> Unit): Animals {
     return AnimalsBuilder()
         .apply { init() }
-        .let { builder -> builder.build() }
+        .run { build() }
 }
 
 class AnimalsBuilder() {
@@ -42,7 +42,6 @@ class AnimalBuilder() {
         set(aName) {
             field = aName
         }
-
 
     fun build(): Animal {
         return Animal(name)
