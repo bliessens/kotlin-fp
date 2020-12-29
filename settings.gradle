@@ -2,4 +2,4 @@ rootProject.name = 'kotlin-fp'
 
 include 'ants-dsl'
 include 'exposed'
-//include 'artifactory'
+include 'artifactory'
