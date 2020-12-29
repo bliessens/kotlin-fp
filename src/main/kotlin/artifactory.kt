@@ -1,5 +1,10 @@
 package artifactory
 
+import io.ktor.client.*
+import io.ktor.client.features.json.*
+import io.ktor.client.request.*
+import kotlin.properties.Delegates
+
 @DslMarker
 annotation class ArtifactoryDsl
 
@@ -9,62 +14,55 @@ fun artifactory(init: ArtifactoryBuilder.() -> Unit): Artifactory {
 }
 
 class ArtifactoryBuilder {
-    internal var at = ""
+    internal var url: String by Delegates.notNull()
     internal var auth: Credentials = NoAuthentication
     internal var repositories: Collection<Repository> = listOf()
 
-    fun at(url: String): Unit {
-        this.at = url
-    }
-
-    fun at(block: () -> String): Unit {
-        this.at = block()
+    fun url(block: () -> String): Unit {
+        this.url = block()
     }
 
     fun auth(init: AuthenticationBuilder.() -> Unit): Unit {
         auth = AuthenticationBuilder().apply { init() }.run { build() }
     }
 
-    fun repo(init: RepositoryBuilder.() -> Unit): Unit {
-        repositories += RepositoryBuilder().apply { init() }.run { build() }
-    }
-
-    infix fun String.type(aType: String): RepositoryBuilder {
-        val builder = RepositoryBuilder()
-        builder.name = this
-        builder.type = RepoType.valueOf(aType.toUpperCase())
-        return builder
-    }
-
-    infix fun RepositoryBuilder.cleanup(aStrategy: Strategy): Unit {
-        this.cleanUp = aStrategy
-        repositories += this.build()
+    fun repositories(init: RepositoryCollector.() -> Unit): Unit {
+        repositories = RepositoryCollector().apply { init() }.run { build() }
     }
 
     fun build(): Artifactory {
-        return Artifactory(at, auth, repositories)
+        return Artifactory(url, auth, repositories)
     }
 }
 
-class RepositoryBuilder {
-    lateinit var name: String
-    lateinit var type: RepoType
-    var cleanUp: Strategy = NoStrategy
+class RepositoryCollector {
+    internal var repositories = listOf<Repository>()
 
-    fun build(): Repository {
-        assert(cleanUp != NoStrategy, { "Strategy should be set on repo '$name'" })
-        return Repository(name, type, cleanUp)
+    fun timeLimited(days: Int = 60, name: () -> String): Unit {
+        repositories += Repository(name(), RepoType.DOCKER, TimeBasedExpiry(days))
+    }
+
+    fun quantityLimited(max: Int = 10, name: () -> String): Unit {
+        repositories += Repository(name(), RepoType.DOCKER, QuantityBasedExpiry(max))
+    }
+
+//    operator fun invoke() : Collection<Repository> {
+//        return repositories;
+//    }
+
+    fun build(): Collection<Repository> {
+        return repositories
     }
 }
 
+@Deprecated("should be detected through Artifactory API")
 enum class RepoType {
     RPM, DOCKER
 }
 
 sealed class Strategy
-object NoStrategy : Strategy()
-class TimeBasedExpiry(daysTilExpiry: Int = 30) : Strategy()
-class QuantityBasedExpiry(maxArtifactsToKeep: Int = 10) : Strategy()
+data class TimeBasedExpiry(val daysTilExpiry: Int) : Strategy()
+data class QuantityBasedExpiry(val maxArtifactsToKeep: Int) : Strategy()
 
 class Repository(val name: String, val type: RepoType, val strategy: Strategy)
 
@@ -74,11 +72,23 @@ class Authentication(val user: String, val password: String) : Credentials()
 
 
 class AuthenticationBuilder {
-    var user = ""
-    var password = ""
+    internal var user by Delegates.notNull<String>()
+    internal var password by Delegates.notNull<String>()
     fun build(): Credentials {
         return Authentication(user, password)
     }
+}
+
+val client = HttpClient() {
+    install(JsonFeature) {
+        serializer = JacksonSerializer()
+    }
+//    install(Auth) {
+//        basic {
+//            username = ""
+//            password = ""
+//        }
+//    }
 }
 
 class Artifactory(
@@ -87,4 +97,18 @@ class Artifactory(
     val repositories: Collection<Repository>
 ) {
 
+}
+
+
+suspend fun main(args: Array<String>) {
+    val client = HttpClient() {
+        install(JsonFeature) {
+            serializer = JacksonSerializer()
+        }
+    }
+    val response =
+        client.get<String>("http://valartifactorydev01.violabor.local:8081/artifactory/repositories/docker-dev")
+    println(response)
+
+    client.close()
 }

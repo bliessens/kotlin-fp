@@ -1,0 +1,17 @@
+apply plugin: 'kotlin-kapt'
+
+repositories {
+    maven { url "https://dl.bintray.com/juanchosaravia/autodsl" }
+}
+
+dependencies {
+    api "com.juanchosaravia.autodsl:annotation:0.0.9"
+    kapt "com.juanchosaravia.autodsl:processor:0.0.9"
+}
+
+idea {
+    module  {
+        sourceDirs += files('build/generated/source/kapt/main', 'build/generated/source/kaptKotlin/main')
+        generatedSourceDirs += files('build/generated/source/kapt/main', 'build/generated/source/kaptKotlin/main')
+    }
+}

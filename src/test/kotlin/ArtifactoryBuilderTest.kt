@@ -1,64 +1,76 @@
-import artifactory.*
+package artifactory
+
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import kotlin.test.Ignore
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import kotlin.test.fail
 
 internal class ArtifactoryBuilderTest {
 
     @Test
     internal fun testSyntax() {
         val artifactory = artifactory {
-            at { "abc" }
+            url { "abc" }
             auth {
                 user = "srvjenkins"
                 password = ""
             }
-            repo {
-                name = "docker-dev"
-                type = RepoType.DOCKER
-                cleanUp = TimeBasedExpiry()
+
+            repositories {
+                timeLimited { "docker-dev" }
+                timeLimited(30) { "docker-tst" }
+                quantityLimited { "docker-qas" }
             }
 
-            "docker-tst" type "docker" cleanup QuantityBasedExpiry()
         }
 
         assertEquals(artifactory.baseUrl, "abc")
         assertTrue(Authentication::class.isInstance(artifactory.auth))
-        assertEquals(artifactory.repositories.size, 2)
-        assertEquals(artifactory.repositories.last().name, "docker-tst")
-        assertEquals(artifactory.repositories.last().type, RepoType.DOCKER)
+        assertEquals(artifactory.repositories.size, 3)
+        assertEquals(artifactory.repositories.map { r -> r.name }, listOf("docker-dev", "docker-tst", "docker-qas"))
+        assertEquals(
+            artifactory.repositories.map { r -> r.type },
+            listOf(RepoType.DOCKER, RepoType.DOCKER, RepoType.DOCKER)
+        )
+        assertEquals(
+            artifactory.repositories.map { r -> r.strategy },
+            listOf(TimeBasedExpiry(60), TimeBasedExpiry(30), QuantityBasedExpiry(10))
+        )
 
     }
 
     @Test
-    internal fun testDefaults() {
-        val artifactory = artifactory {}
+    internal fun testBaseUrlIsMandatory() {
+        assertThrows<IllegalStateException> { artifactory {} }
+    }
 
-        assertEquals(artifactory.baseUrl, "")
+    @Test
+    internal fun testDefaultCredentials() {
+        val artifactory = artifactory {
+            url { "abc" }
+        }
+        assertEquals(artifactory.baseUrl, "abc")
         assertTrue(NoAuthentication::class.isInstance(artifactory.auth))
     }
 
+    @Ignore
     @Test
-    internal fun failWhenNoStrategy() {
-        try {
+    internal fun failWhenNoRepositoryName() {
+        assertThrows<java.lang.IllegalStateException>("repo name is mandatory") {
             artifactory {
-                at { "abc" }
-                repo {
-                    name = "docker-dev"
-                    type = RepoType.DOCKER
+                url { "abc" }
+                repositories {
+                    timeLimited { "" }
                 }
             }
-            fail("should fail because missing repo config")
-        } catch (e: AssertionError) {
-
         }
     }
 
     @Test
     internal fun testAuthentication() {
         val artifactory = artifactory {
-            at { "http://valartifatorydev01.violabor.local" }
+            url { "http://valartifatorydev01.violabor.local" }
             auth {
                 user = "srvjenkins"
                 password = ""
@@ -69,17 +81,9 @@ internal class ArtifactoryBuilderTest {
     }
 
     @Test
-    internal fun testAtWithStringParam() {
-        val artifactory = artifactory {
-            at("http://valartifatorydev01.violabor.local")
-        }
-        assertEquals(artifactory.baseUrl, "http://valartifatorydev01.violabor.local")
-    }
-
-    @Test
     internal fun testAtWithLambda() {
         val artifactory = artifactory {
-            at { "http://valartifatorydev01.violabor.local" }
+            url { "http://valartifatorydev01.violabor.local" }
         }
         assertEquals(artifactory.baseUrl, "http://valartifatorydev01.violabor.local")
     }
@@ -87,8 +91,9 @@ internal class ArtifactoryBuilderTest {
     @Test
     internal fun testAtAsProperty() {
         val artifactory = artifactory {
-            at = "http://valartifatorydev01.violabor.local"
+            url = "http://valartifatorydev01.violabor.local"
         }
         assertEquals(artifactory.baseUrl, "http://valartifatorydev01.violabor.local")
     }
+
 }
