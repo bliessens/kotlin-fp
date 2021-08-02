@@ -1,4 +1,8 @@
+@file:JvmName("Stacks")
+
 package stack
+
+import java.util.*
 
 interface Stack<T : Any> {
 
@@ -8,13 +12,14 @@ interface Stack<T : Any> {
 
     fun peek(): T?
 
-    val size: Int
+    fun size(): Int
 
-    val isEmpty: Boolean
-        get() = size == 0
+    fun isEmpty(): Boolean = size() == 0
 }
 
 fun <T : Any> stackOf(vararg elements: T): Stack<T> = ArrayListStack<T>().apply { elements.forEach { push(it) } }
+
+fun <T : Any> linkedStackOf(vararg elements: T): Stack<T> = LinkedListStack<T>().apply { elements.forEach { push(it) } }
 
 fun <T : Any> List<T>.toStack(): Stack<T> = stackOf<T>().apply { this@toStack.forEach { push(it) } }
 
@@ -31,12 +36,30 @@ private class ArrayListStack<T : Any> : Stack<T> {
             elements.removeAt(elements.size - 1)
     }
 
-    override fun push(element: T): T = element.also { elements.add(element) }
+    override fun push(element: T): T = element.also { elements.add(it) }
 
     override fun peek(): T? {
         return elements.lastOrNull()
     }
 
-    override val size: Int
-        get() = elements.size
+    override fun size(): Int = elements.size
+}
+
+
+private class LinkedListStack<T : Any> : Stack<T> {
+
+    private val elements = LinkedList<T>()
+
+    override fun pop(): T? {
+        return if (elements.isEmpty())
+            null
+        else
+            elements.removeAt(elements.size - 1)
+    }
+
+    override fun push(element: T): T = element.also { elements += it }
+
+    override fun peek(): T? = elements.lastOrNull()
+
+    override fun size(): Int = elements.size
 }

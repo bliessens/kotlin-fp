@@ -9,7 +9,7 @@ internal class ArrayListStackTest {
     internal fun popEmptyStackReturnsNull() {
         val s = stackOf<String>()
 
-        assertTrue(s.isEmpty)
+        assertTrue(s.isEmpty())
         assertNull(s.pop())
     }
 
@@ -20,8 +20,8 @@ internal class ArrayListStackTest {
         val pushed = s.push("abc")
 
         assertEquals("abc", pushed)
-        assertEquals(1, s.size)
-        assertFalse(s.isEmpty)
+        assertEquals(1, s.size())
+        assertFalse(s.isEmpty())
     }
 
     @Test
@@ -29,8 +29,8 @@ internal class ArrayListStackTest {
         val s = stackOf("d")
 
         assertEquals("d", s.pop())
-        assertEquals(0, s.size)
-        assertTrue(s.isEmpty)
+        assertEquals(0, s.size())
+        assertTrue(s.isEmpty())
     }
 
     @Test
@@ -40,14 +40,14 @@ internal class ArrayListStackTest {
         s.push("abc")
 
         assertEquals("abc", s.peek())
-        assertEquals(1, s.size)
+        assertEquals(1, s.size())
     }
 
     @Test
     internal fun pushMaintainsOrder() {
         val s = stackOf("abc", "def", "klm")
 
-        assertEquals(3, s.size)
+        assertEquals(3, s.size())
         assertEquals("klm", s.pop())
         assertEquals("def", s.pop())
         assertEquals("abc", s.pop())
@@ -56,21 +56,25 @@ internal class ArrayListStackTest {
     private fun String.checkParenthesis(): Boolean {
         val stack = stackOf<Char>()
 
+        fun popIfChar(char: Char): Boolean {
+            if (stack.isEmpty())
+                return true
+            else {
+                if (char == stack.peek())
+                    stack.pop()
+            }
+            return false
+        }
+
         this.forEach { char ->
             when (char) {
-                '(' -> {
-                    stack.push(char)
-                }
-                ')' -> {
-                    if (stack.isEmpty)
-                        return false
-                    else {
-                        stack.pop()
-                    }
-                }
+                '(', '{' -> stack.push(char)
+                ')' -> if (popIfChar('(')) return false
+                '}' -> if (popIfChar('{')) return false
             }
         }
-        return stack.isEmpty
+
+        return stack.isEmpty()
     }
 
     @Test
@@ -84,14 +88,14 @@ internal class ArrayListStackTest {
     internal fun listToStackConversion() {
         val stack = listOf("(", "(", ")", "(", ")", ")").toStack()
 
-        assertEquals(6, stack.size)
+        assertEquals(6, stack.size())
     }
 
     @Test
     internal fun mapToStackConversion() {
         val stack = mapOf(1 to "a", 2 to "b").toStack()
 
-        assertEquals(2, stack.size)
+        assertEquals(2, stack.size())
         assertEquals(2 to "b", stack.pop())
         assertEquals(1 to "a", stack.pop())
     }
