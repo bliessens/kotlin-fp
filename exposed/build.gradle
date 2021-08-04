@@ -1,18 +1,12 @@
 dependencies {
-    repositories {
-        jcenter()
-    }
-
-    implementation 'org.jetbrains.exposed:exposed-core:0.27.1'
-    implementation 'org.jetbrains.exposed:exposed-dao:0.27.1'
-    implementation 'org.jetbrains.exposed:exposed-jdbc:0.27.1'
-    runtimeOnly "org.hsqldb:hsqldb:2.5.0"
+    implementation 'org.jetbrains.exposed:exposed-core:0.32.1'
+    implementation 'org.jetbrains.exposed:exposed-dao:0.32.1'
+    implementation 'org.jetbrains.exposed:exposed-jdbc:0.32.1'
+    runtimeOnly 'org.hsqldb:hsqldb:2.6.0'
 }
-
 
 idea {
     module {
         excludeDirs += [file('src/db')]
-
     }
 }
