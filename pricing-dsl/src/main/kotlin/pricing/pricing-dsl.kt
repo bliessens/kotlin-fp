@@ -1,8 +1,5 @@
 package pricing.dsl
 
-//@DslMarker
-//annotation class PricingDsl
-
 enum class Country {
     ES, DE
 }
@@ -18,7 +15,6 @@ fun Country.pricing(init: PricingConfig.() -> Unit): PricingConfig {
 object add
 object set
 
-//@PricingDsl
 abstract class PricingConfig {
 
     lateinit var basePrice: Price
@@ -28,8 +24,8 @@ abstract class PricingConfig {
     open val tourism = Tax(0.0)
 
     fun total(): Price {
-        return basePrice + taxes.map { it -> basePrice * it }
-            .fold(Price.ZERO, { accumulatedSum, tax -> accumulatedSum + tax })
+        return taxes.map { it -> basePrice * it }
+            .fold(basePrice, { intermediateSum, tax -> intermediateSum + tax })
     }
 
     infix fun set.base(price: Int) = base(price.toDouble())
@@ -52,6 +48,8 @@ abstract class PricingConfig {
 data class Tax(val percentage: Double)
 data class Price(val price: Double) {
 
+    constructor(price: Int) : this(price.toDouble())
+
     operator fun times(tax: Tax): Price {
         return Price(price * tax.percentage)
     }
@@ -60,9 +58,6 @@ data class Price(val price: Double) {
         return Price(this.price + price.price)
     }
 
-    companion object {
-        val ZERO = Price(0.0)
-    }
 }
 
 class Spain : PricingConfig() {
@@ -76,22 +71,4 @@ class Germany : PricingConfig() {
 
     override val tourism: Tax
         get() = Tax(0.05)
-}
-
-
-fun main(args: Array<String>) {
-    val spain = pricingOf(Country.ES) {
-        set base 100
-        add tax vat
-        add tax tourism
-    }
-    println(spain.total())
-
-    val germany = Country.DE.pricing {
-        set base 100
-        add tax vat
-        add tax tourism
-    }
-
-    println(germany.total())
 }
