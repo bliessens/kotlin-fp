@@ -7,8 +7,12 @@ enum class Country {
     ES, DE
 }
 
-fun pricing(country: Country, init: PricingConfig.() -> Unit): PricingConfig {
+fun pricingOf(country: Country, init: PricingConfig.() -> Unit): PricingConfig {
     return PricingConfig.forCountry(country).apply(init)
+}
+
+fun Country.pricing(init: PricingConfig.() -> Unit): PricingConfig {
+    return PricingConfig.forCountry(this).apply(init)
 }
 
 object add
@@ -31,7 +35,7 @@ abstract class PricingConfig {
     infix fun set.base(price: Int) = base(price.toDouble())
     infix fun set.base(price: Double) = Price(price).also { basePrice = it }
 
-    infix fun add.tax(tax: Tax): Unit {
+    infix fun add.tax(tax: Tax) {
         taxes.add(tax)
     }
 
@@ -76,14 +80,14 @@ class Germany : PricingConfig() {
 
 
 fun main(args: Array<String>) {
-    val spain = pricing(Country.ES) {
+    val spain = pricingOf(Country.ES) {
         set base 100
         add tax vat
         add tax tourism
     }
-
     println(spain.total())
-    val germany = pricing(Country.DE) {
+
+    val germany = Country.DE.pricing {
         set base 100
         add tax vat
         add tax tourism
