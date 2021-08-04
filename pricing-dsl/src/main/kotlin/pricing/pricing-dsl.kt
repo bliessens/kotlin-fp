@@ -24,7 +24,7 @@ abstract class PricingConfig {
     open val tourism = Tax(0.0)
 
     fun total(): Price {
-        return taxes.map { it -> basePrice * it }
+        return taxes.map { tax -> basePrice * tax }
             .fold(basePrice, { intermediateSum, tax -> intermediateSum + tax })
     }
 
