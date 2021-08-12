@@ -5,4 +5,4 @@ include("exposed")
 include("artifactory")
 include("datastructs")
 include("pricing-dsl")
-
+include("scheduling-dsl")
