@@ -98,7 +98,7 @@ fun main() {
         starts at 10..15
         ends at 10..45
         on date 15 March 2020
-        attendees include "a" and "b" and "c"
+        attendees include "Nick" and "Maria" and "Suzan"
     }
 
     println(meeting)

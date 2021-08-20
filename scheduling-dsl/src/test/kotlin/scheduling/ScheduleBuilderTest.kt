@@ -1,6 +1,8 @@
-import org.assertj.core.api.Assertions.assertThat
+package scheduling
+
+import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import scheduling.schedule
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -12,7 +14,7 @@ class ScheduleBuilderTest {
             assign name "SCRUM"
         }
 
-        assertThat(meeting.name).isEqualTo("SCRUM")
+        Assertions.assertThat(meeting.name).isEqualTo("SCRUM")
     }
 
     @Test
@@ -21,7 +23,7 @@ class ScheduleBuilderTest {
             starts at 12..0
         }
 
-        assertThat(meeting.start).isEqualTo(LocalTime.of(12, 0))
+        Assertions.assertThat(meeting.start).isEqualTo(LocalTime.of(12, 0))
     }
 
     @Test
@@ -30,7 +32,7 @@ class ScheduleBuilderTest {
             ends at 12..59
         }
 
-        assertThat(meeting.end).isEqualTo(LocalTime.of(12, 59))
+        Assertions.assertThat(meeting.end).isEqualTo(LocalTime.of(12, 59))
     }
 
     @Test
@@ -39,7 +41,17 @@ class ScheduleBuilderTest {
             on date 12 August 2021
         }
 
-        assertThat(meeting.date).isEqualTo(LocalDate.of(2021, 8, 12))
+        Assertions.assertThat(meeting.date).isEqualTo(LocalDate.of(2021, 8, 12))
+    }
+
+    @Disabled
+    @Test
+    fun testDateOfMeetingInvaldSyntax() {
+        val meeting = schedule meeting {
+            //on date  August //12 2021
+        }
+
+        Assertions.assertThat(meeting.date).isEqualTo(LocalDate.of(2021, 8, 12))
     }
 
     @Test
@@ -48,7 +60,7 @@ class ScheduleBuilderTest {
             attendees include "me" and "you" and "the tribe" and "some groupies"
         }
 
-        assertThat(meeting.participants)
+        Assertions.assertThat(meeting.participants)
             .hasSize(4)
             .contains("me", "you", "the tribe", "some groupies")
     }
