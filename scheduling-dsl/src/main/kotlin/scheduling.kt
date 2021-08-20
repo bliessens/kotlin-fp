@@ -6,11 +6,14 @@ import java.time.LocalTime
 
 object schedule {
     infix fun meeting(init: ScheduleBuilder.() -> Unit): ScheduleBuilder {
-        return ScheduleBuilder().apply(init)
+        return ScheduleBuilder().apply(init).validate()
     }
 }
 
 class ScheduleBuilder {
+
+    private val errors = mutableListOf<String>()
+
     var name: String? = null
     var date: LocalDate? = null
     var start: LocalTime? = null
@@ -24,6 +27,17 @@ class ScheduleBuilder {
     val attendees = Attendee()
     infix fun name(name: String) {
         this@ScheduleBuilder.name = name
+    }
+
+    fun validate(): ScheduleBuilder {
+        if (date == null)
+            errors += "Date is mandatory"
+        if (start == null)
+            errors += "Start time is not given"
+
+//        if (errors.isNotEmpty())
+//            throw IllegalStateException(errors.toString())
+        return this
     }
 
     override fun toString(): String {
@@ -53,27 +67,27 @@ class ScheduleBuilder {
 
     inner class DateBuilder(val day: Int, val schedule: ScheduleBuilder) {
 
-        private fun scheduleOn(day: Int, month: Int, year: Int): Unit {
-            schedule.date = LocalDate.of(day, month, year)
+        private fun scheduleOn(month: Int, year: Int): Unit {
+            schedule.date = LocalDate.of(year, month, day)
         }
 
-        infix fun January(year: Int) = scheduleOn(day, 1, year)
+        infix fun January(year: Int) = scheduleOn(1, year)
 
-        infix fun February(year: Int) = scheduleOn(day, 2, year)
+        infix fun February(year: Int) = scheduleOn(2, year)
 
-        infix fun March(year: Int) = scheduleOn(day, 3, year)
+        infix fun March(year: Int) = scheduleOn(3, year)
 
-        infix fun April(year: Int) = scheduleOn(day, 4, year)
+        infix fun April(year: Int) = scheduleOn(4, year)
 
-        infix fun May(year: Int) = scheduleOn(day, 5, year)
+        infix fun May(year: Int) = scheduleOn(5, year)
 
-        infix fun June(year: Int) = scheduleOn(day, 6, year)
+        infix fun June(year: Int) = scheduleOn(6, year)
 
-        infix fun July(year: Int) = scheduleOn(day, 7, year)
+        infix fun July(year: Int) = scheduleOn(7, year)
 
-        infix fun August(year: Int) = scheduleOn(day, 8, year)
+        infix fun August(year: Int) = scheduleOn(8, year)
 
-        infix fun September(year: Int) = scheduleOn(day, 9, year)
+        infix fun September(year: Int) = scheduleOn(9, year)
     }
 
     inner class Attendee {
