@@ -10,39 +10,20 @@ object schedule {
     }
 }
 
-object assign
-object starts
-object ends
-object on
-object attendees
-
 class ScheduleBuilder {
-
     var name: String? = null
     var date: LocalDate? = null
     var start: LocalTime? = null
     var end: LocalTime? = null
     val participants = mutableListOf<String>()
 
-    infix fun assign.name(name: String) {
+    val assign = this
+    val starts = Starts()
+    val ends = Ends()
+    val on = On()
+    val attendees = Attendee()
+    infix fun name(name: String) {
         this@ScheduleBuilder.name = name
-    }
-
-    infix fun starts.at(range: IntRange) {
-        this@ScheduleBuilder.start = LocalTime.of(range.start, range.endInclusive)
-    }
-
-    infix fun ends.at(range: IntRange) {
-        this@ScheduleBuilder.end = LocalTime.of(range.start, range.endInclusive)
-    }
-
-    infix fun on.date(dayOfMonth: Int): DateBuilder {
-        return DateBuilder(dayOfMonth)
-    }
-
-    infix fun attendees.include(name: String): AttendeeBuilder {
-        this@ScheduleBuilder.participants += name
-        return AttendeeBuilder()
     }
 
     override fun toString(): String {
@@ -52,48 +33,60 @@ class ScheduleBuilder {
         """.trimMargin()
     }
 
-    inner class DateBuilder(val day: Int) {
-        infix fun January(year: Int) {
-            this@ScheduleBuilder.date = LocalDate.of(year, 1, day)
-        }
-
-        infix fun February(year: Int) {
-            this@ScheduleBuilder.date = LocalDate.of(year, 2, day)
-        }
-
-        infix fun March(year: Int) {
-            this@ScheduleBuilder.date = LocalDate.of(year, 3, day)
-        }
-
-        infix fun April(year: Int) {
-            this@ScheduleBuilder.date = LocalDate.of(year, 4, day)
-        }
-
-        infix fun May(year: Int) {
-            this@ScheduleBuilder.date = LocalDate.of(year, 5, day)
-        }
-
-        infix fun June(year: Int) {
-            this@ScheduleBuilder.date = LocalDate.of(year, 6, day)
-        }
-
-        infix fun July(year: Int) {
-            this@ScheduleBuilder.date = LocalDate.of(year, 7, day)
-        }
-
-        infix fun August(year: Int) {
-            this@ScheduleBuilder.date = LocalDate.of(year, 8, day)
-        }
-
-        infix fun September(year: Int) {
-            this@ScheduleBuilder.date = LocalDate.of(year, 9, day)
+    inner class Starts {
+        infix fun at(time: IntRange) {
+            this@ScheduleBuilder.start = LocalTime.of(time.start, time.endInclusive)
         }
     }
 
-    inner class AttendeeBuilder {
-        infix fun and(name: String): AttendeeBuilder {
+    inner class Ends {
+        infix fun at(time: IntRange) {
+            this@ScheduleBuilder.end = LocalTime.of(time.start, time.endInclusive)
+        }
+    }
+
+    inner class On {
+        infix fun date(dayOfMonth: Int): DateBuilder {
+            return DateBuilder(dayOfMonth, this@ScheduleBuilder)
+        }
+    }
+
+    inner class DateBuilder(val day: Int, val schedule: ScheduleBuilder) {
+
+        private fun scheduleOn(day: Int, month: Int, year: Int): Unit {
+            schedule.date = LocalDate.of(day, month, year)
+        }
+
+        infix fun January(year: Int) = scheduleOn(day, 1, year)
+
+        infix fun February(year: Int) = scheduleOn(day, 2, year)
+
+        infix fun March(year: Int) = scheduleOn(day, 3, year)
+
+        infix fun April(year: Int) = scheduleOn(day, 4, year)
+
+        infix fun May(year: Int) = scheduleOn(day, 5, year)
+
+        infix fun June(year: Int) = scheduleOn(day, 6, year)
+
+        infix fun July(year: Int) = scheduleOn(day, 7, year)
+
+        infix fun August(year: Int) = scheduleOn(day, 8, year)
+
+        infix fun September(year: Int) = scheduleOn(day, 9, year)
+    }
+
+    inner class Attendee {
+        infix fun include(name: String): AttendeeContinuation {
             this@ScheduleBuilder.participants += name
-            return AttendeeBuilder()
+            return AttendeeContinuation()
+        }
+
+        inner class AttendeeContinuation {
+            infix fun and(name: String): AttendeeContinuation {
+                this@ScheduleBuilder.participants += name
+                return AttendeeContinuation()
+            }
         }
     }
 }

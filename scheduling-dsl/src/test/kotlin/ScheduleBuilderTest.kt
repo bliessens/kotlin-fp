@@ -1,13 +1,13 @@
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import scheduling.*
+import scheduling.schedule
 import java.time.LocalDate
 import java.time.LocalTime
 
-internal class ScheduleBuilderTest {
+class ScheduleBuilderTest {
 
     @Test
-    internal fun testName() {
+    fun testName() {
         val meeting = schedule meeting {
             assign name "SCRUM"
         }
@@ -16,7 +16,7 @@ internal class ScheduleBuilderTest {
     }
 
     @Test
-    internal fun testStartTimeOfMeeting() {
+    fun testStartTimeOfMeeting() {
         val meeting = schedule meeting {
             starts at 12..0
         }
@@ -25,7 +25,7 @@ internal class ScheduleBuilderTest {
     }
 
     @Test
-    internal fun testEndTimeOfMeeting() {
+    fun testEndTimeOfMeeting() {
         val meeting = schedule meeting {
             ends at 12..59
         }
@@ -34,7 +34,7 @@ internal class ScheduleBuilderTest {
     }
 
     @Test
-    internal fun testDateOfMeeting() {
+    fun testDateOfMeeting() {
         val meeting = schedule meeting {
             on date 12 August 2021
         }
@@ -43,7 +43,7 @@ internal class ScheduleBuilderTest {
     }
 
     @Test
-    internal fun testMeetingAttendees() {
+    fun testMeetingAttendees() {
         val meeting = schedule meeting {
             attendees include "me" and "you" and "the tribe" and "some groupies"
         }
