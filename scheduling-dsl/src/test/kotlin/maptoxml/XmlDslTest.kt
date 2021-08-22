@@ -5,14 +5,16 @@ import org.junit.jupiter.api.Test
 
 class XmlDslTest {
 
+    private val languagesAndAuthors = mapOf("Java" to "Gosling", "Lisp" to "McCarthy", "Ruby" to "Matz")
+
     @Test
     fun testXmlFragment() {
         val xml = xml("languages") {
             languagesAndAuthors.entries.forEach { entry ->
                 val (title, author) = entry
-                tag("language") {
+                node("language") {
                     attribute named "title" withValue title
-                    tag("author") {
+                    node("author") {
                         attribute named "name" withValue author
                     }
                 }
